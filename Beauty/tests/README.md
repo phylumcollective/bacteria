@@ -1,0 +1,4 @@
+# beauty_project_ML
+The world deep RNN model for the Beauty project.
+
+We explore utilizing a world deep reinforcement learning model to be trained to learn the a spatial and temporal environment of Paenibacillus dendritiformis pattern- forming bacteria. Using the features identified from the world model bacterial colony as inputs to an agent, we aim to create a controller from the model to solve the required task of placing solutions of acidic acetic acid, glucose, or repellent (anti-biotics) into the bacteria&#39;s environment (cultures). The world model is trained to extract features of the environment that it can then identify as being &#39;beautiful&#39; or aesthetically pleasing. The world model can then make a future predictions of future what actions it can take to instigate more or less &#39;beautiful&#39; patterns formed by the bacteria.
