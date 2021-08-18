@@ -1,9 +1,14 @@
+'''
+Object tracking. Find contours in a video and send either
+the boundingRect coordinates or the convex hull points via OSC
+'''
+
 import cv2
 import argparse
 import time
 import numpy as np
 from pythonosc import udp_client, osc_message_builder, osc_bundle_builder
-import distanceTracker
+import sys
 
 
 def rescaleFrame(frame, scaleFactor=0.5):
@@ -60,6 +65,8 @@ def sendContours(boxIds, addr='/swarm/contour'):
 
 
 if __name__ == "__main__":
+    print(__doc__)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--ip", default="127.0.0.1", help="The ip of the OSC server")
     parser.add_argument("--port", type=int, default=5005, help="The port the OSC server is listening on")
@@ -68,6 +75,9 @@ if __name__ == "__main__":
     parser.add_argument("--sendHull", type=bool, default=False, help="Send convexHull points instead of the boundingRect points of the contours")
     args = parser.parse_args()
 
+    # adding utils folder to the system path
+    sys.path.insert(0, '/Users/carlos/Documents/GitHub/bacteria/utils/')
+    import distanceTracker
 
     # def adjustContrast(image, clip_hist_percent=1):
     #     # Automatic brightness and contrast optimization with optional histogram clipping
@@ -122,7 +132,7 @@ if __name__ == "__main__":
     # set up video capture
     cap = cv2.VideoCapture("videos/PA_03-15-21.mp4")
 
-    # read the frames then convert to grayscale and rescale
+    # read a frame then convert it to grayscale and rescale
     ret, frame = cap.read()
     frameGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frameGray = rescaleFrame(frameGray)
@@ -132,7 +142,7 @@ if __name__ == "__main__":
     # initializing output images
     averageVal = np.float32(frameGray)
 
-    # Object detection from Stable camera
+    # Object detection object
     object_detector = cv2.createBackgroundSubtractorMOG2(
        history=100, varThreshold=25)
 

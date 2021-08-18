@@ -30,7 +30,7 @@ img = scaleImg(img)
 
 # blur & threshold
 imgBlur = cv2.medianBlur(img, 15)
-ret, thresh = cv2.threshold(imgBlur, 110, 255, cv2.THRESH_BINARY)
+ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY)
 
 # find Contours
 contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
