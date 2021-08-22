@@ -19,7 +19,7 @@ def scaleImg(img, scaleFactor=0.5):
 
 
 # load image
-img = loadImg('img/DSC_3643.JPG')
+img = loadImg('img/Beauty_PA2_1333_2021_03_18_13_45_31.JPG')
 img = scaleImg(img)
 # img = cv2.equalizeHist(img)
 # blur
@@ -27,7 +27,7 @@ img = scaleImg(img)
 
 # Change the background to black in order to extract better results during the Distance Transform
 src = img.copy()
-src[np.all(src < 188, axis=2)] = 0
+src[np.all(src < 145, axis=2)] = 0
 
 # Create a kernel that we will use to sharpen our image
 # an approximation of second derivative, a quite strong kernel
@@ -49,7 +49,7 @@ imgLaplacian = np.uint8(imgLaplacian)
 
 # Create binary image from source image
 bw = cv2.cvtColor(imgResult, cv2.COLOR_BGR2GRAY)
-ret, thresh = cv2.threshold(bw, 40, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+ret, thresh = cv2.threshold(bw, 170, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
 # noise removal
 kernel = np.ones((3, 3), np.uint8)
@@ -66,7 +66,7 @@ dist = cv2.erode(opening, kernel, iterations=3)
 cv2.normalize(dist, dist, 0, 1.0, cv2.NORM_MINMAX)
 
 # This will be the markers for the foreground objects
-ret, sure_fg = cv2.threshold(dist, 0.001, 1.0, cv2.THRESH_BINARY)
+ret, sure_fg = cv2.threshold(dist, 0.9, 1.0, cv2.THRESH_BINARY)
 
 # Finding unknown region
 sure_fg = np.uint8(sure_fg)
@@ -101,9 +101,11 @@ contours, hierarchy = cv2.findContours(markers.copy(), cv2.RETR_CCOMP, cv2.CHAIN
 for i in range(len(contours)):
     area = cv2.contourArea(contours[i])
     # last column in the array is -1 if an external contour (no contours inside of it)
-    if hierarchy[0][i][3] == -1:
+    if hierarchy[0][i][3] == -1 and area > 25000:
         # We can now draw the external contours from the list of contours
         cv2.drawContours(src, contours, i, (0, 255, 0), 2)
+        x, y, w, h = cv2.boundingRect(contours[i])
+        cv2.rectangle(src, (x, y), (x + w, y + h), (255, 255, 255), 2)
 
 
 cv2.imshow("src", src)

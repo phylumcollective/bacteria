@@ -20,7 +20,7 @@ def scaleImg(img, scaleFactor=0.5):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
+    parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
     args = parser.parse_args()
 
 
