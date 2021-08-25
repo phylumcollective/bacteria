@@ -8,6 +8,7 @@ from tensorflow.keras.layers import Dropout, Flatten, Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.preprocessing import image
+from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
 from sklearn.metrics import confusion_matrix
 
 import os
@@ -15,7 +16,7 @@ import random
 import fnmatch
 
 
-# based upon: https://github.com/spmallick/learnopencv/blob/0b2eb3cb68852d6005038c7f2266c3464bc7cd46/Keras-Transfer-Learning/transfer-learning-vgg.ipynb
+# loosely based upon: https://github.com/spmallick/learnopencv/blob/0b2eb3cb68852d6005038c7f2266c3464bc7cd46/Keras-Transfer-Learning/transfer-learning-vgg.ipynb
 # and https://www.kaggle.com/raulcsimpetru/vgg16-binary-classification
 
 
@@ -161,8 +162,9 @@ model.summary()
 # === TRAIN THE MODEL ===
 # let's reduce the learning rate a bit first
 # https://keras.io/api/callbacks/reduce_lr_on_plateau/
-lr_adjust = tf.keras.callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.75, patience=1, verbose=0, mode="auto", min_delta=0.001, cooldown=0, min_lr=0)
-results = model.fit(train_generator, epochs=EPOCHS, validation_data=validation_generator, callbacks=[lr_adjust])
+# lr_adjust = tf.keras.callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.75, patience=1, verbose=0, mode="auto", min_delta=0.001, cooldown=0, min_lr=0)
+# results = model.fit(train_generator, epochs=EPOCHS, validation_data=validation_generator, callbacks=[lr_adjust])
+results = model.fit(train_generator, epochs=EPOCHS, validation_data=validation_generator)
 
 # === EVALUATE THE MODEL ===
 # plot loss and validation accuracy
@@ -224,3 +226,33 @@ print(f'Probability that the image {swirl} is a swirl: {prediction_prob[0][0]} '
 # === SAVE THE MODEL ===
 model.save(os.path.join(MODEL_FOLDER, 'model'))
 model.save_weights(os.path.join(MODEL_FOLDER + '/weights/', 'weights'), save_format="tf")
+
+# save a frozen graph - which is needed for prpoper infereceing (prediction) in oepn cv
+# https://leimao.github.io/blog/Save-Load-Inference-From-TF2-Frozen-Graph/
+# https://stackoverflow.com/questions/62288678/save-pb-and-pbtxt-file-from-keras?rq=1
+# Convert Keras model to ConcreteFunction
+# full_model = tf.function(lambda x: model(x))
+# full_model = full_model.get_concrete_function(
+#     tf.TensorSpec(model.inputs[0].shape, model.inputs[0].dtype))
+#
+# # Get frozen ConcreteFunction
+# frozen_func = convert_variables_to_constants_v2(full_model)
+# frozen_func.graph.as_graph_def()
+#
+# layers = [op.name for op in frozen_func.graph.get_operations()]
+# print("-" * 50)
+# print("Frozen model layers: ")
+# for layer in layers:
+#     print(layer)
+#
+# print("-" * 50)
+# print("Frozen model inputs: ")
+# print(frozen_func.inputs)
+# print("Frozen model outputs: ")
+# print(frozen_func.outputs)
+#
+# # Save frozen graph from frozen ConcreteFunction to hard drive
+# tf.io.write_graph(graph_or_graph_def=frozen_func.graph,
+#                   logdir=MODEL_FOLDER + "/frozen_model/",
+#                   name="frozen_graph.pb",
+#                   as_text=False)
