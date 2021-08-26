@@ -52,3 +52,4 @@ flake8==3.9.2
 tensorflow==2.5.1
 seaborn==0.11.2
 labelImg==1.8.5
+pyserial==3.5
