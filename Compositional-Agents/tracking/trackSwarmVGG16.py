@@ -18,7 +18,7 @@ if __name__ == "__main__":
     CLASSES = ["snake", "swirl"]
 
     # get a different color array for each of the classes
-    COLORS = ([255,0,0], [0,255,0])
+    COLORS = ([255, 0, 0], [0, 255, 0])
 
     # load the VGG16 model
     model = cv2.dnn.readNetFromTensorflow("../classification/models/vgg16/0000_swarming/frozen_model/frozen_graph.pb")
