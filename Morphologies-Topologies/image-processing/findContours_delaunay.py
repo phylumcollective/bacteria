@@ -60,6 +60,9 @@ if __name__ == "__main__":
 img = loadImg('img/DSC_3574.JPG', gray=True)
 img = scaleImg(img)
 
+img2 = loadImg('img/DSC_3574.JPG')
+img2 = scaleImg(img2)
+
 # blur & threshold
 imgBlur = cv2.medianBlur(img, 15)
 ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY)
@@ -90,12 +93,15 @@ for i in range(len(contours)-2):
         # cv2.circle(out, (cX, cY), 3, (255, 255, 255), -1)
         # draw contours
         cv2.drawContours(out, contours, i, (204, 204, 204), 3)
+        cv2.drawContours(img2, contours, i, (204, 204, 204), 3)
         # draw contour bounding rectangle
         x, y, w, h = cv2.boundingRect(contours[i])
         cv2.rectangle(out, (x, y), (x + w, y + h), (255, 255, 255), 1)
+        cv2.rectangle(img2, (x, y), (x + w, y + h), (0, 0, 0), 1)
         cv2.putText(out, str(i), (x, y - 10), cv2.FONT_HERSHEY_PLAIN, 1.5, (255, 255, 255), 1)
         # draw Delaunay triangles
         draw_delaunay(out, subdiv, (127, 127, 127))
+        draw_delaunay(img2, subdiv, (127, 127, 127))
 
 # the roi variables
 x, y, w, h = args.roi
@@ -103,7 +109,8 @@ x, y, w, h = args.roi
 roi = out[int(y):int(y)+int(h), int(x):int(x)+int(w)].copy()
 
 cv2.imshow("Image", scaleImg(loadImg('img/DSC_3574.JPG')))
-cv2.imshow("Contours", scaleImg(roi))
+cv2.imshow("Contours (mask)", scaleImg(roi))
+cv2.imshow("Contours", img2)
 
 while True:
     key = cv2.waitKey(1) & 0xFF
