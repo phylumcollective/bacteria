@@ -102,7 +102,7 @@ for i in range(len(contours)-2):
             cv2.putText(out, str(i), (x, y - 10), cv2.FONT_HERSHEY_PLAIN, 1.5, (255, 255, 255), 1)
         # draw Delaunay triangles
         draw_delaunay(out, subdiv, (127, 127, 127))
-        draw_delaunay(img2, subdiv, (127, 127, 127))
+        draw_delaunay(img2, subdiv, (255, 255, 255))
 
 
 cv2.imshow("Image", scaleImg(loadImg('img/DSC_3574.JPG')))
