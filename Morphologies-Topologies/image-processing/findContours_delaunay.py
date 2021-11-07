@@ -18,7 +18,7 @@ def scaleImg(img, scaleFactor=0.5):
     return cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
 
 
-# Draw delaunay triangles
+# draw Delaunay triangles
 def draw_delaunay(img, subdiv, delaunay_color):
     triangleList = subdiv.getTriangleList()
     triangleList = np.array(triangleList, dtype=np.int32)
@@ -52,14 +52,13 @@ def rect_contains(rect, point):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
-    parser.add_argument("-r", "--roi", required=True, nargs="+", help="the x/y and width/height of the roi")
+    # parser.add_argument("-r", "--roi", required=True, nargs="+", help="the x/y and width/height of the roi")
     args = parser.parse_args()
 
 
 # load image, convert to gray and scale down
 img = loadImg('img/DSC_3574.JPG', gray=True)
 img = scaleImg(img)
-
 img2 = loadImg('img/DSC_3574.JPG')
 img2 = scaleImg(img2)
 
@@ -70,6 +69,7 @@ ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY
 # find Contours
 contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
+# mask
 out = np.zeros_like(thresh)
 
 # Rectangle to be used with Subdiv2D
@@ -78,7 +78,7 @@ rect = (0, 0, size[1], size[0])
 # Create an instance of Subdiv2D
 subdiv = cv2.Subdiv2D(rect)
 
-# draw the contours (#inus -2 removes plate edges)
+# draw the contours (-2 removes plate edges)
 for i in range(len(contours)-2):
     # Calculate area and remove small elements
     area = cv2.contourArea(contours[i])
@@ -89,27 +89,24 @@ for i in range(len(contours)-2):
         # calculate x,y coordinate of centroid & draw it (also add the coords to the centerPoints array)
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        subdiv.insert((cX, cY))
-        # cv2.circle(out, (cX, cY), 3, (255, 255, 255), -1)
-        # draw contours
-        cv2.drawContours(out, contours, i, (204, 204, 204), 3)
-        cv2.drawContours(img2, contours, i, (204, 204, 204), 3)
-        # draw contour bounding rectangle
-        x, y, w, h = cv2.boundingRect(contours[i])
-        cv2.rectangle(out, (x, y), (x + w, y + h), (255, 255, 255), 1)
-        cv2.rectangle(img2, (x, y), (x + w, y + h), (0, 0, 0), 1)
-        cv2.putText(out, str(i), (x, y - 10), cv2.FONT_HERSHEY_PLAIN, 1.5, (255, 255, 255), 1)
+        if cX < size[1] - 250:
+            subdiv.insert((cX, cY))
+            # cv2.circle(out, (cX, cY), 3, (255, 255, 255), -1)
+            # draw contours
+            cv2.drawContours(out, contours, i, (204, 204, 204), 3)
+            cv2.drawContours(img2, contours, i, (204, 204, 204), 3)
+            # draw contour bounding rectangle
+            x, y, w, h = cv2.boundingRect(contours[i])
+            cv2.rectangle(out, (x, y), (x + w, y + h), (255, 255, 255), 1)
+            cv2.rectangle(img2, (x, y), (x + w, y + h), (0, 0, 0), 1)
+            cv2.putText(out, str(i), (x, y - 10), cv2.FONT_HERSHEY_PLAIN, 1.5, (255, 255, 255), 1)
         # draw Delaunay triangles
         draw_delaunay(out, subdiv, (127, 127, 127))
         draw_delaunay(img2, subdiv, (127, 127, 127))
 
-# the roi variables
-x, y, w, h = args.roi
-# select roi
-roi = out[int(y):int(y)+int(h), int(x):int(x)+int(w)].copy()
 
 cv2.imshow("Image", scaleImg(loadImg('img/DSC_3574.JPG')))
-cv2.imshow("Contours (mask)", scaleImg(roi))
+cv2.imshow("Contours (mask)", out)
 cv2.imshow("Contours", img2)
 
 while True:
