@@ -21,13 +21,16 @@ def scaleImg(img, scaleFactor=0.5):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
-    parser.add_argument("-r", "--roi", required=True, nargs="+", help="the x/y and width/height of the roi")
+    # parser.add_argument("-r", "--roi", required=True, nargs="+", help="the x/y and width/height of the roi")
     args = parser.parse_args()
 
 
 # load image, convert to gray and scale down
 img = loadImg('img/DSC_3574.JPG', gray=True)
 img = scaleImg(img)
+img2 = loadImg('img/DSC_3574.JPG')
+img2 = scaleImg(img2)
+print(img.shape)
 
 # blur & threshold
 imgBlur = cv2.medianBlur(img, 15)
@@ -38,32 +41,30 @@ contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_CCOMP, cv2.CHAIN_
 
 out = np.zeros_like(thresh)
 
-# approxs = []
+approxs = []
 
 # draw the contours
 for i in range(len(contours)):
     # -1 in 4th column means it's an external contour
     if hierarchy[0][i][3] == -1:
         # contour approximation ("smoothing")
-        # epsilon = 0.01*cv2.arcLength(contours[i], True)
-        # approx = cv2.approxPolyDP(contours[i], epsilon, True)
-        # approxs.append(approx)
+        epsilon = 0.01*cv2.arcLength(contours[i], True)
+        approx = cv2.approxPolyDP(contours[i], epsilon, True)
+        approxs.append(approx)
         # print(approx)
-        # cv2.drawContours(out, [approx], -1, (204, 204, 204), 3)
-        cv2.drawContours(out, contours, i, (204, 204, 204), 3)
+        cv2.drawContours(out, [approx], -1, (204, 204, 204), 3)
+        cv2.drawContours(img2, [approx], -1, (204, 204, 204), 3)
+        # cv2.drawContours(out, contours, i, (204, 204, 204), 3)
         # print(contours[i][0][0])
         # for a in approx:
         #     for aa in a:
         #         print(aa)
 # print(approxs)
 
-# the roi variables
-x, y, w, h = args.roi
-# select roi
-roi = out[int(y):int(y)+int(h), int(x):int(x)+int(w)].copy()
 
 cv2.imshow("Image", scaleImg(loadImg('img/DSC_3574.JPG')))
-cv2.imshow("Contours", scaleImg(roi))
+cv2.imshow("Contours (mask)", out)
+cv2.imshow("Contours", img2)
 
 while True:
     key = cv2.waitKey(1) & 0xFF
