@@ -30,7 +30,9 @@ img = loadImg('img/DSC_3574.JPG', gray=True)
 img = scaleImg(img)
 img2 = loadImg('img/DSC_3574.JPG')
 img2 = scaleImg(img2)
-print(img.shape)
+
+# create the random seeds based upon image dimensions
+seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
 
 # blur & threshold
 imgBlur = cv2.medianBlur(img, 15)
@@ -43,23 +45,35 @@ out = np.zeros_like(thresh)
 
 approxs = []
 
-# draw the contours
-for i in range(len(contours)):
+# draw the contours (-2 removes plate edges)
+for i in range(len(contours)-2):
+    # Calculate area and remove small elements
+    area = cv2.contourArea(contours[i])
     # -1 in 4th column means it's an external contour
-    if hierarchy[0][i][3] == -1:
-        # contour approximation ("smoothing")
-        epsilon = 0.01*cv2.arcLength(contours[i], True)
-        approx = cv2.approxPolyDP(contours[i], epsilon, True)
-        approxs.append(approx)
-        # print(approx)
-        cv2.drawContours(out, [approx], -1, (204, 204, 204), 3)
-        cv2.drawContours(img2, [approx], -1, (204, 204, 204), 3)
-        # cv2.drawContours(out, contours, i, (204, 204, 204), 3)
-        # print(contours[i][0][0])
-        # for a in approx:
-        #     for aa in a:
-        #         print(aa)
-# print(approxs)
+    if hierarchy[0][i][3] == -1 and area > 566:
+        M = cv2.moments(contours[i])
+        # calculate x,y coordinate of centroid & draw it (also add the coords to the centerPoints array)
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+        if cX < img.shape[1] - 250:
+            # contour approximation ("smoothing")
+            epsilon = 0.01*cv2.arcLength(contours[i], True)
+            approx = cv2.approxPolyDP(contours[i], epsilon, True)
+            approxs.append(approx)
+            # print(approx)
+            cv2.drawContours(out, [approx], -1, (204, 204, 204), 3)
+            cv2.drawContours(img2, [approx], -1, (204, 204, 204), 3)
+            # cv2.drawContours(out, contours, i, (204, 204, 204), 3)
+            # print(contours[i][0][0])
+            # for a in approx:
+            #     for aa in a:
+            #         print(aa)
+for a in approxs:
+    for cnt in a:
+        coord = cnt[0]
+        # remember numpy arrays are row/col while opencv are col/row (as is common for images)
+        print(seeds[coord[1]][coord[0]])
+        print(coord)
 
 
 cv2.imshow("Image", scaleImg(loadImg('img/DSC_3574.JPG')))
