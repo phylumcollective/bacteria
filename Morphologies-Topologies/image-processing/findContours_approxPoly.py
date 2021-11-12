@@ -32,7 +32,7 @@ img2 = loadImg('img/DSC_3574.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
-seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
+img_seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
 
 # blur & threshold
 imgBlur = cv2.medianBlur(img, 15)
@@ -44,6 +44,7 @@ contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_CCOMP, cv2.CHAIN_
 out = np.zeros_like(thresh)
 
 approxs = []
+gen_seeds = []
 
 # draw the contours (-2 removes plate edges)
 for i in range(len(contours)-2):
@@ -72,7 +73,8 @@ for a in approxs:
     for cnt in a:
         coord = cnt[0]
         # remember numpy arrays are row/col while opencv are col/row (as is common for images)
-        print(seeds[coord[1]][coord[0]])
+        print(img_seeds[coord[1]][coord[0]])
+        gen_seeds.append(img_seeds[coord[1]][img_seeds[0]])
         print(coord)
 
 
