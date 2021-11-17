@@ -74,7 +74,7 @@ for a in approxs:
         coord = cnt[0]
         # remember numpy arrays are row/col while opencv are col/row (as is common for images)
         print(img_seeds[coord[1]][coord[0]])
-        gen_seeds.append(img_seeds[coord[1]][img_seeds[0]])
+        gen_seeds.append(img_seeds[coord[1]][coord[0]])
         print(coord)
 
 
