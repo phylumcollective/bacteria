@@ -19,7 +19,7 @@ def scaleImg(img, scaleFactor=0.5):
 
 
 # load image
-img = loadImg('img/Beauty_PA2_1333_2021_03_18_13_45_31.JPG')
+img = loadImg('img/DSC_3574.JPG')
 img = scaleImg(img)
 # img = cv2.equalizeHist(img)
 # blur

@@ -130,7 +130,10 @@ if __name__ == "__main__":
     tracker = distanceTracker.EuclideanDistTracker()
 
     # set up video capture
-    cap = cv2.VideoCapture("videos/PA_03-15-21.mp4")
+    # cap = cv2.VideoCapture("videos/PA_03-15-21.mp4")
+    cap = cv2.VideoCapture(2)
+    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 512)
+    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 512)
 
     # read a frame then convert it to grayscale and rescale
     ret, frame = cap.read()

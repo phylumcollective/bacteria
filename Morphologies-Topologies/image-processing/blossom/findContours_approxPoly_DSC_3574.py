@@ -21,14 +21,14 @@ def scaleImg(img, scaleFactor=0.5):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
+    # parser.add_argument("-f", "--filepath", required=True, help="Path to the image file")
     # parser.add_argument("-r", "--roi", required=True, nargs="+", help="the x/y and width/height of the roi")
     args = parser.parse_args()
 
-
 # load image, convert to gray and scale down
-img = loadImg('img/DSC_3574.JPG', gray=True)
+img = loadImg('../img/blossom/DSC_3574.JPG', gray=True)
 img = scaleImg(img)
-img2 = loadImg('img/DSC_3574.JPG')
+img2 = loadImg('../img/blossom/DSC_3574.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
@@ -69,16 +69,17 @@ for i in range(len(contours)-2):
             # for a in approx:
             #     for aa in a:
             #         print(aa)
+print("number of contours: " + str(len(approxs)))
 for a in approxs:
     for cnt in a:
         coord = cnt[0]
         # remember numpy arrays are row/col while opencv are col/row (as is common for images)
-        print(img_seeds[coord[1]][coord[0]])
+        # print(img_seeds[coord[1]][coord[0]])
         gen_seeds.append(img_seeds[coord[1]][coord[0]])
-        print(coord)
+        # print(coord)
 
 
-cv2.imshow("Image", scaleImg(loadImg('img/DSC_3574.JPG')))
+cv2.imshow("Image", scaleImg(loadImg('../img/blossom/DSC_3574.JPG')))
 cv2.imshow("Contours (mask)", out)
 cv2.imshow("Contours", img2)
 
