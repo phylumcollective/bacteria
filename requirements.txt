@@ -53,3 +53,10 @@ tensorflow==2.5.1
 seaborn==0.11.2
 labelImg==1.8.5
 pyserial==3.5
+imutils==0.5.4
+mac-tag
+psd-tools3
+lpips==0.1.4
+PyMuPDF==1.19.2
+requests==2.21.0
+gphoto2==2.3.0
