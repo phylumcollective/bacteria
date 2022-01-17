@@ -32,10 +32,11 @@ img2 = loadImg('../img/blossom/DSC_3574.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
+# so we have an x/y grid of seeds (that correspond to pixel coordinates) (x*y+1)
 img_seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
 
 # blur & threshold
-imgBlur = cv2.medianBlur(img, 15)
+imgBlur = cv2.medianBlur(img, 15)  # path attribute: 3 (limit blurring)
 ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY)
 
 # find Contours

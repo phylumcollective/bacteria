@@ -18,10 +18,11 @@ def scaleImg(img, scaleFactor=0.5):
     return cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
 
 
-def processImg(img):
-    # img_blur = cv2.GaussianBlur(img, (3, 3), 3)
-    img_canny = cv2.Canny(img, 55, 295)
-    kernel = np.ones((9, 9))
+def processImg(img, min, max):
+    #img1 = cv2.GaussianBlur(img, (3, 3), 3)
+    img_canny = cv2.Canny(img, min, max)
+    #img_lap = cv2.Laplacian(img1, cv2.CV_8UC1)
+    kernel = np.ones((5, 5))
     img_dilate = cv2.dilate(img_canny, kernel, iterations=2)
     img_erode = cv2.erode(img_dilate, kernel, iterations=1)
     return img_erode
@@ -37,11 +38,12 @@ if __name__ == "__main__":
 # load image, convert to gray and scale down
 img = loadImg('../img/blossom/BMC_0681.JPG', gray=True)
 img = scaleImg(img)
-img = processImg(img)
+img = processImg(img, 55, 295)
 img2 = loadImg('../img/blossom/BMC_0681.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
+# so we have an x/y grid of seeds (that correspond to pixel coordinates) (x*y+1)
 img_seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
 
 # blur & threshold
@@ -61,14 +63,14 @@ for i in range(len(contours)):
     # Calculate area and remove small elements
     area = cv2.contourArea(contours[i])
     # -1 in 4th column means it's an external contour
-    if hierarchy[0][i][3] == -1 and area > 820:
+    if hierarchy[0][i][3] == -1 and area > 500:
         M = cv2.moments(contours[i])
         # calculate x,y coordinate of centroid & draw it (also add the coords to the centerPoints array)
-        cX = int(M["m10"] / M["m00"]) # cY > 115 and cX > 160:
+        cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        if cY < img.shape[0] - 350 and cX < img.shape[0] - 250 and (cY * cX) > 99000 and cY > 245 and cX > 160:
+        if cY < img.shape[0] - 350 and cX < img.shape[0] - 155 and (cY * cX) > 99000 and cY > 245 and cX > 10:
             # contour approximation ("smoothing")
-            epsilon = 0.01*cv2.arcLength(contours[i], True)
+            epsilon = 0.001*cv2.arcLength(contours[i], True)
             approx = cv2.approxPolyDP(contours[i], epsilon, True)
             approxs.append(approx)
             # print(approx)
@@ -83,12 +85,12 @@ for a in approxs:
     for cnt in a:
         coord = cnt[0]
         # remember numpy arrays are row/col while opencv are col/row (as is common for images)
-        print(img_seeds[coord[1]][coord[0]])
+        # print(img_seeds[coord[1]][coord[0]])
         gen_seeds.append(img_seeds[coord[1]][coord[0]])
-        print(coord)
+        # print(coord)
 
 
-cv2.imshow("Image", scaleImg(loadImg('../img/blossom/BMC_0681.JPG')))
+cv2.imshow("Image", processImg(scaleImg(loadImg('../img/blossom/BMC_0681.JPG')), 55, 295))
 cv2.imshow("Contours (mask)", out)
 cv2.imshow("Contours", img2)
 
