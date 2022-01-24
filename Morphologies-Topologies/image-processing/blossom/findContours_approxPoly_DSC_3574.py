@@ -42,6 +42,7 @@ ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY
 # find Contours
 contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
+# mask
 out = np.zeros_like(thresh)
 
 approxs = []
@@ -54,7 +55,7 @@ for i in range(len(contours)-2):
     # -1 in 4th column means it's an external contour
     if hierarchy[0][i][3] == -1 and area > 566:
         M = cv2.moments(contours[i])
-        # calculate x,y coordinate of centroid & draw it (also add the coords to the centerPoints array)
+        # calculate x,y coordinate of centroid & draw it
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
         if cX < img.shape[1] - 250:
@@ -63,8 +64,9 @@ for i in range(len(contours)-2):
             approx = cv2.approxPolyDP(contours[i], epsilon, True)
             approxs.append(approx)
             # print(approx)
-            cv2.drawContours(out, [approx], -1, (204, 204, 204), 3)
-            cv2.drawContours(img2, [approx], -1, (204, 204, 204), 3)
+            approx2 = cv2.approxPolyDP(contours[i], epsilon*0.01, True)
+            cv2.drawContours(out, [approx2], -1, (204, 204, 204), 3)
+            cv2.drawContours(img2, [approx2], -1, (204, 204, 204), 3)
             # cv2.drawContours(out, contours, i, (204, 204, 204), 3)
             # print(contours[i][0][0])
             # for a in approx:
@@ -79,13 +81,20 @@ for a in approxs:
         gen_seeds.append(img_seeds[coord[1]][coord[0]])
         # print(coord)
 
+print("number of seeds: " + str(len(gen_seeds)))
+
 
 cv2.imshow("Image", scaleImg(loadImg('../img/blossom/DSC_3574.JPG')))
 cv2.imshow("Contours (mask)", out)
 cv2.imshow("Contours", img2)
 
+cv2.imwrite('../img/blossom/DSC_3574_contours.jpg', out)
+
 while True:
     key = cv2.waitKey(1) & 0xFF
+    if key == 115:
+        cv2.imwrite('../img/blossom/DSC_3574_contours.jpg', out)
+        break
     if key == 27:
         break
 
