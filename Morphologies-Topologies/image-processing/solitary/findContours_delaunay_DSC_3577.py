@@ -82,7 +82,7 @@ img2 = scaleImg(img2)
 img_seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
 
 # blur & threshold
-imgBlur = cv2.medianBlur(img, 15)  # path attribute: 3 (limit blurring)
+imgBlur = cv2.medianBlur(img, 15)
 ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY)
 
 # find Contours
