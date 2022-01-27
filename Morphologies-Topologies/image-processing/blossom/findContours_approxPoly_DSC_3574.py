@@ -88,8 +88,6 @@ cv2.imshow("Image", scaleImg(loadImg('../img/blossom/DSC_3574.JPG')))
 cv2.imshow("Contours (mask)", out)
 cv2.imshow("Contours", img2)
 
-cv2.imwrite('../img/blossom/DSC_3574_contours.jpg', out)
-
 while True:
     key = cv2.waitKey(1) & 0xFF
     if key == 115:
