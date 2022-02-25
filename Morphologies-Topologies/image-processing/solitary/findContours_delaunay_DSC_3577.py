@@ -116,7 +116,7 @@ for i in range(len(contours)-2):
             subdiv.insert(approx)
             # print(approx)
             approx2 = cv2.approxPolyDP(contours[i], epsilon*0.01, True)
-            # cv2.drawContours(out, [approx], -1, (204, 204, 204), 3)
+            cv2.drawContours(out, contours, i, (204, 204, 204), 3)
             cv2.drawContours(img2, [approx2], -1, (204, 204, 204), 3)
 
         # draw Delaunay triangles
