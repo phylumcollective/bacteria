@@ -20,7 +20,7 @@ def scaleImg(img, scaleFactor=0.5):
     return cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
 
 
-# thresh 66
+# thresh 95
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
@@ -29,9 +29,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 # load image, convert to gray and scale down
-img = loadImg('../img/disperse/BSM_1799.JPG', gray=True)
+img = loadImg('../img/disperse/2021-06-29-2200-01-08-22.JPG', gray=True)
 img = scaleImg(img)
-img2 = loadImg('../img/disperse/BSM_1799.JPG')
+img2 = loadImg('../img/disperse/2021-06-29-2200-01-08-22.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
@@ -56,12 +56,12 @@ for i in range(len(contours)-2):
     # Calculate area and remove small elements
     area = cv2.contourArea(contours[i])
     # -1 in 4th column means it's an external contour
-    if hierarchy[0][i][3] == -1 and area > 180:
+    if hierarchy[0][i][3] == -1 and area > 100 and area < 99000:
         M = cv2.moments(contours[i])
         # calculate x,y coordinate of centroid & draw it
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        if cY < img.shape[0] - 420 and cX < img.shape[1] - 400 and (cY * cX) > 99000 and cY > 470 and cX > 120:
+        if cY < img.shape[0] - 420 and cX < img.shape[1] - 400 and (cY * cX) > 99000 and cY > 470 and cX > 320:
             # create a convex hull object for each contour
             h = cv2.convexHull(contours[i], False)
             # append to hull list
@@ -97,14 +97,14 @@ for h in hull:
 print("number of seeds: " + str(len(gen_seeds)))
 
 
-cv2.imshow("Image", scaleImg(loadImg('../img/disperse/BSM_1799.JPG')))
+cv2.imshow("Image", scaleImg(loadImg('../img/disperse/2021-06-29-2200-01-08-22.JPG')))
 cv2.imshow("Contours (mask)", out)
 cv2.imshow("Contours", img2)
 
 while True:
     key = cv2.waitKey(1) & 0xFF
     if key == 115:
-        cv2.imwrite('../img/disperse/BSM_1799_contours.jpg', out)
+        cv2.imwrite('../img/disperse/2021-06-29-2200-01-08-22_contours.jpg', out)
         break
     if key == 27:
         break
