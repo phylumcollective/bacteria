@@ -19,7 +19,7 @@ def scaleImg(img, scaleFactor=0.5):
 
 
 # load image
-img = loadImg('img/DSC_3574.JPG')
+img = loadImg('img/blossom/DSC_3574.JPG')
 img = scaleImg(img)
 # img = cv2.equalizeHist(img)
 # blur
@@ -97,18 +97,21 @@ markers = cv2.watershed(src, markers)
 # find contours on the markers
 contours, hierarchy = cv2.findContours(markers.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
+# mask
+out = np.zeros_like(thresh)
+
 # for every entry in contours
 for i in range(len(contours)):
     area = cv2.contourArea(contours[i])
     # last column in the array is -1 if an external contour (no contours inside of it)
     if hierarchy[0][i][3] == -1 and area > 25000:
         # We can now draw the external contours from the list of contours
-        cv2.drawContours(src, contours, i, (0, 255, 0), 2)
+        cv2.drawContours(out, contours, i, (255, 255, 255), 2)
         x, y, w, h = cv2.boundingRect(contours[i])
-        cv2.rectangle(src, (x, y), (x + w, y + h), (255, 255, 255), 2)
+        cv2.rectangle(out, (x, y), (x + w, y + h), (255, 255, 255), 2)
 
 
-cv2.imshow("src", src)
+cv2.imshow("src", out)
 cv2.imshow("img", img)
 
 while True:

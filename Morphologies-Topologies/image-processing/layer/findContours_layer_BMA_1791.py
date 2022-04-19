@@ -21,13 +21,13 @@ def scaleImg(img, scaleFactor=0.5):
 
 
 def processImg(img, min, max):
-    #img1 = cv2.GaussianBlur(img, (3, 3), 3)
+    # img1 = cv2.GaussianBlur(img, (3, 3), 3)
     img_canny = cv2.Canny(img, min, max)
-    #img_lap = cv2.Laplacian(img1, cv2.CV_8UC1)
-    kernel = np.ones((7, 7), np.uint8)
-    img_dilate = cv2.dilate(img_canny, kernel, iterations=1)
-    img_erode = cv2.erode(img_dilate, kernel, iterations=1)
-    return img_erode
+    # img_lap = cv2.Laplacian(img1, cv2.CV_8UC1)
+    # kernel = np.ones((7, 7), np.uint8)
+    # img_dilate = cv2.dilate(img_canny, kernel, iterations=2)
+    # img_erode = cv2.erode(img_dilate, kernel, iterations=1)
+    return img_canny
 
 
 # find the two contour points with longest distance between them (path attribute: balance)
@@ -72,10 +72,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 # load image, convert to gray and scale down
-img = loadImg('../img/blossom/BMC_0681.JPG', gray=True)
+img = loadImg('../img/layer/BMA_1791.JPG', gray=True)
 img = scaleImg(img)
-img = processImg(img, 55, 260)
-img2 = loadImg('../img/blossom/BMC_0681.JPG')
+img = processImg(img, 70, 335)
+img2 = loadImg('../img/layer/BMA_1791.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
@@ -107,7 +107,7 @@ for i in range(len(contours)):
         # calculate x,y coordinate of centroid & draw it
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        if cY < img.shape[0] - 350 and cX < img.shape[0] - 155 and (cY * cX) > 99000 and cY > 245 and cX > 10:
+        if cY < img.shape[0] - 350 and cX < img.shape[1] - 235 and (cY * cX) > 99000 and cY > 245 and cX > 20:
             # contour approximation ("smoothing")
             epsilon = 0.0001*cv2.arcLength(contours[i], True)
             approx = cv2.approxPolyDP(contours[i], epsilon, True)
@@ -150,7 +150,7 @@ for lp in longestPts:
 
 print("number of seeds: " + str(len(gen_seeds)))
 
-cv2.imshow("Image", processImg(scaleImg(loadImg('../img/blossom/BMC_0681.JPG')), 55, 260))
+cv2.imshow("Image", processImg(scaleImg(loadImg('../img/layer/BMA_1791.JPG')), 55, 260))
 cv2.imshow("Contours (mask:out)", out)
 cv2.imshow("Contours (mask:out1)", out1)
 cv2.imshow("Contours", img2)
@@ -158,8 +158,8 @@ cv2.imshow("Contours", img2)
 while True:
     key = cv2.waitKey(1) & 0xFF
     if key == 115:
-        cv2.imwrite('../img/blossom/BMC_0681_contours_out.jpg', out)
-        cv2.imwrite('../img/blossom/BMC_0681_contours_out1.jpg', out1)
+        cv2.imwrite('../img/layer/BMA_1791_contours_out.jpg', out)
+        cv2.imwrite('../img/layer/BMA_1791_contours_out1.jpg', out1)
         break
     if key == 27:
         break

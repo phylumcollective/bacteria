@@ -20,16 +20,6 @@ def scaleImg(img, scaleFactor=0.5):
     return cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
 
 
-def processImg(img, min, max):
-    #img1 = cv2.GaussianBlur(img, (3, 3), 3)
-    img_canny = cv2.Canny(img, min, max)
-    #img_lap = cv2.Laplacian(img1, cv2.CV_8UC1)
-    kernel = np.ones((7, 7), np.uint8)
-    img_dilate = cv2.dilate(img_canny, kernel, iterations=1)
-    img_erode = cv2.erode(img_dilate, kernel, iterations=1)
-    return img_erode
-
-
 # find the two contour points with longest distance between them (path attribute: balance)
 def findLongestDist(cnt):
     # get contour extremes
@@ -63,7 +53,7 @@ def findLongestDist(cnt):
     return maxDistPts
 
 
-# threshold = 1 (entangled)
+# thresh 95
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
@@ -72,10 +62,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 # load image, convert to gray and scale down
-img = loadImg('../img/blossom/BMC_0681.JPG', gray=True)
+img = loadImg('../img/disperse/BMA_1493.JPG', gray=True)
 img = scaleImg(img)
-img = processImg(img, 55, 260)
-img2 = loadImg('../img/blossom/BMC_0681.JPG')
+img2 = loadImg('../img/disperse/BMA_1493.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
@@ -83,53 +72,52 @@ img2 = scaleImg(img2)
 img_seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
 
 # blur & threshold
-imgBlur = cv2.medianBlur(img, 1)
+imgBlur = cv2.medianBlur(img, 15)
 ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY)
 
 # find Contours
 contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
 # mask
-out = np.zeros_like(img)
-out1 = np.zeros_like(img)
+out = np.zeros_like(thresh)
+out1 = np.zeros_like(thresh)
 
-# centroids = []
-longestPts = []
+hull = []
 gen_seeds = []
+longestPts = []
 
-# draw the contours
-for i in range(len(contours)):
+# draw the contours (-2 removes plate edges)
+for i in range(len(contours)-2):
     # Calculate area and remove small elements
     area = cv2.contourArea(contours[i])
     # -1 in 4th column means it's an external contour
-    if hierarchy[0][i][3] == -1 and area > 4:
+    if hierarchy[0][i][3] == -1 and area > 9:  # include small contours (aggregate)
         M = cv2.moments(contours[i])
         # calculate x,y coordinate of centroid & draw it
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        if cY < img.shape[0] - 350 and cX < img.shape[0] - 155 and (cY * cX) > 99000 and cY > 245 and cX > 10:
-            # contour approximation ("smoothing")
-            epsilon = 0.0001*cv2.arcLength(contours[i], True)
-            approx = cv2.approxPolyDP(contours[i], epsilon, True)
-            # N = cv2.moments(approx)
-            # centroidX = int(N["m10"] / N["m00"])
-            # centroidY = int(N["m01"] / N["m00"])
-            # centroid = (centroidX, centroidY)
-            # centroids.append(centroid)
-            longest = findLongestDist(approx)  # get the two contour points with the longest distance
+        if cY < img.shape[0] - 420 and cX < img.shape[1] - 10 and (cY * cX) > 99000 and cY > 260 and cX > 320:
+            # create a convex hull object for each contour
+            h = cv2.convexHull(contours[i], False)
+            # append to hull list
+            hull.append(h)
+            hullArea = cv2.contourArea(h)
+            longest = findLongestDist(h)  # get the two contour points with the longest distance
             longestPts.append(longest)
-            # print("the contour:" + str(contours[i]))
-            # print("longest distance:" + str(longest))
-            # print(approx)
-            # converting list to array
             ll = np.array(longest)
-            cv2.drawContours(out1, [ll], -1, (204, 204, 204), 3)
-            cv2.drawContours(img2, [ll], -1, (204, 204, 204), 3)
-            cv2.drawContours(out, contours, i, (204, 204, 204), 3)
-            # print(contours[i][0][0])
-            # for a in approx:
-            #     for aa in a:
-            #         print(aa)
+            if hullArea > 9:
+                cv2.drawContours(out, contours, i, (204, 204, 204), 3)
+                cv2.drawContours(out1, contours, i, (204, 204, 204), 3)
+                cv2.drawContours(out1, [h], -1, (204, 204, 204), 3)
+                cv2.drawContours(out1, [ll], -1, (204, 204, 204), 3)
+                cv2.drawContours(img2, contours, i, (204, 204, 204), 3)
+                cv2.drawContours(img2, [h], -1, (204, 204, 204), 3)
+                # print("number of hull points: " + str(len(h)))
+                # for hh in h:
+                #     coord = hh[0]
+                #     circle = cv2.circle(img2, coord, 10, (255, 0, 0), 1)
+
+
 print("number of contours: " + str(len(longestPts)))
 for lp in longestPts:
     pt1 = lp[0]
@@ -141,16 +129,10 @@ for lp in longestPts:
     gen_seeds.append(img_seeds[pt2[1]][pt2[0]])
     # print(coord)
 
-# print("number of contour centroids: " + str(len(centroids)))
-# for coord in centroids:
-#     # remember numpy arrays are row/col while opencv are col/row (as is common for images)
-#     # print(img_seeds[coord[1]][coord[0]])
-#     gen_seeds.append(img_seeds[coord[1]][coord[0]])
-#     # print(coord)
-
 print("number of seeds: " + str(len(gen_seeds)))
 
-cv2.imshow("Image", processImg(scaleImg(loadImg('../img/blossom/BMC_0681.JPG')), 55, 260))
+
+cv2.imshow("Image", scaleImg(loadImg('../img/disperse/BMA_1493.JPG')))
 cv2.imshow("Contours (mask:out)", out)
 cv2.imshow("Contours (mask:out1)", out1)
 cv2.imshow("Contours", img2)
@@ -158,8 +140,8 @@ cv2.imshow("Contours", img2)
 while True:
     key = cv2.waitKey(1) & 0xFF
     if key == 115:
-        cv2.imwrite('../img/blossom/BMC_0681_contours_out.jpg', out)
-        cv2.imwrite('../img/blossom/BMC_0681_contours_out1.jpg', out1)
+        cv2.imwrite('../img/disperse/BMA_1493_contours_out.jpg', out)
+        cv2.imwrite('../img/disperse/BMA_1493_contours_out1.jpg', out1)
         break
     if key == 27:
         break

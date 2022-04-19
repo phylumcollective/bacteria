@@ -19,7 +19,7 @@ def scaleImg(img, scaleFactor=0.5):
 
 
 # load image
-img = loadImg('img/DSC_3643.JPG', gray=True)
+img = loadImg('img/layer/DSC_3643.JPG', gray=True)
 img = scaleImg(img)
 
 # img = cv2.equalizeHist(img)

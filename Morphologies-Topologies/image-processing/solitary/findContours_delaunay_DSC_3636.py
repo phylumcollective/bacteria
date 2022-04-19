@@ -73,9 +73,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 # load image, convert to gray and scale down
-img = loadImg('../img/solitary/DSC_3577.JPG', gray=True)
+img = loadImg('../img/solitary/DSC_3636.JPG', gray=True)
 img = scaleImg(img)
-img2 = loadImg('../img/solitary/DSC_3577.JPG')
+img2 = loadImg('../img/solitary/DSC_3636.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
@@ -113,7 +113,7 @@ for i in range(len(contours)-2):
         cY = int(M["m01"] / M["m00"])
         if cY < img.shape[0] - 650 and cX < img.shape[0] - 200 and (cY * cX) > 99000 and cY > 300 and cX > 900:
             # contour approximation ("smoothing")
-            epsilon = 0.01*cv2.arcLength(contours[i], True)
+            epsilon = 0.05*cv2.arcLength(contours[i], True)  # reduce points (remnant)
             approx = cv2.approxPolyDP(contours[i], epsilon, True)
             subdiv.insert(approx)
             # print(approx)
@@ -139,7 +139,7 @@ for t in delaunayPts:
 
 print("number of triangles: " + str(triCount))
 
-cv2.imshow("Image", scaleImg(loadImg('../img/solitary/DSC_3577.JPG')))
+cv2.imshow("Image", scaleImg(loadImg('../img/solitary/DSC_3636.JPG')))
 cv2.imshow("Contours (mask:out)", out)
 cv2.imshow("Contours (mask:out1)", out1)
 cv2.imshow("Contours", img2)
@@ -147,8 +147,8 @@ cv2.imshow("Contours", img2)
 while True:
     key = cv2.waitKey(1) & 0xFF
     if key == 115:
-        cv2.imwrite('../img/solitary/DSC_3577_contours_out.jpg', out)
-        cv2.imwrite('../img/solitary/DSC_3577_contours_out1.jpg', out1)
+        cv2.imwrite('../img/solitary/DSC_3636_contours_out.jpg', out)
+        cv2.imwrite('../img/solitary/DSC_3636_contours_out1.jpg', out1)
         break
     if key == 27:
         break

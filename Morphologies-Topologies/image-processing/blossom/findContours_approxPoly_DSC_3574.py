@@ -18,6 +18,7 @@ def scaleImg(img, scaleFactor=0.5):
     return cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
 
 
+# threshold = 115
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
@@ -36,7 +37,7 @@ img2 = scaleImg(img2)
 img_seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
 
 # blur & threshold
-imgBlur = cv2.medianBlur(img, 15)  # path attribute: 3 (limit blurring)
+imgBlur = cv2.medianBlur(img, 15)  # path attribute: manifold (limit blurring)
 ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY)
 
 # find Contours
@@ -44,6 +45,7 @@ contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_CCOMP, cv2.CHAIN_
 
 # mask
 out = np.zeros_like(thresh)
+out1 = np.zeros_like(thresh)
 
 approxs = []
 gen_seeds = []
@@ -64,9 +66,10 @@ for i in range(len(contours)-2):
             approx = cv2.approxPolyDP(contours[i], epsilon, True)
             approxs.append(approx)
             # print(approx)
-            approx2 = cv2.approxPolyDP(contours[i], epsilon*0.01, True)
-            cv2.drawContours(out, [approx2], -1, (204, 204, 204), 3)
-            cv2.drawContours(img2, [approx2], -1, (204, 204, 204), 3)
+            # approx2 = cv2.approxPolyDP(contours[i], epsilon*0.01, True)
+            cv2.drawContours(out, contours, i, (204, 204, 204), 3)
+            cv2.drawContours(out1, [approx], -1, (204, 204, 204), 3)
+            cv2.drawContours(img2, [approx], -1, (204, 204, 204), 3)
             # cv2.drawContours(out, contours, i, (204, 204, 204), 3)
             # print(contours[i][0][0])
             # for a in approx:
@@ -85,13 +88,15 @@ print("number of seeds: " + str(len(gen_seeds)))
 
 
 cv2.imshow("Image", scaleImg(loadImg('../img/blossom/DSC_3574.JPG')))
-cv2.imshow("Contours (mask)", out)
+cv2.imshow("Contours (mask:out)", out)
+cv2.imshow("Contours (mask:out1)", out1)
 cv2.imshow("Contours", img2)
 
 while True:
     key = cv2.waitKey(1) & 0xFF
     if key == 115:
-        cv2.imwrite('../img/blossom/DSC_3574_contours.jpg', out)
+        cv2.imwrite('../img/blossom/DSC_3574_contours_out.jpg', out)
+        cv2.imwrite('../img/blossom/DSC_3574_contours_out1.jpg', out1)
         break
     if key == 27:
         break

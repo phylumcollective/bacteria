@@ -20,7 +20,7 @@ def scaleImg(img, scaleFactor=0.5):
     return cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
 
 
-# thresh 66
+# thresh 66 (entangled)
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
@@ -47,6 +47,7 @@ contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_CCOMP, cv2.CHAIN_
 
 # mask
 out = np.zeros_like(thresh)
+out1 = np.zeros_like(thresh)
 
 hull = []
 gen_seeds = []
@@ -69,7 +70,8 @@ for i in range(len(contours)-2):
             hullArea = cv2.contourArea(h)
             if hullArea > 2000:
                 cv2.drawContours(out, contours, i, (204, 204, 204), 3)
-                cv2.drawContours(out, [h], -1, (204, 204, 204), 3)
+                cv2.drawContours(out1, contours, i, (204, 204, 204), 3)
+                cv2.drawContours(out1, [h], -1, (204, 204, 204), 3)
                 cv2.drawContours(img2, contours, i, (204, 204, 204), 3)
                 cv2.drawContours(img2, [h], -1, (204, 204, 204), 3)
                 # print("number of hull points: " + str(len(h)))
@@ -84,7 +86,7 @@ for h in hull:
         print("number of hull points: " + str(len(h)))
         for hh in h:
             coord = hh[0]
-            # randomly adjust the amounts
+            # randomly adjust the amounts (latent)
             r0 = random.randint(-1, 1)
             r1 = random.randint(-1, 1)
             coord[0] = coord[0] + r0
@@ -92,19 +94,21 @@ for h in hull:
             # remember numpy arrays are row/col while opencv are col/row (as is common for images)
             # print(img_seeds[coord[1]][coord[0]])
             gen_seeds.append(img_seeds[coord[1]][coord[0]])
-            print(coord)
+            # print(coord)
 
 print("number of seeds: " + str(len(gen_seeds)))
 
 
 cv2.imshow("Image", scaleImg(loadImg('../img/disperse/BSM_1799.JPG')))
-cv2.imshow("Contours (mask)", out)
+cv2.imshow("Contours (mask:out)", out)
+cv2.imshow("Contours (mask:out1)", out1)
 cv2.imshow("Contours", img2)
 
 while True:
     key = cv2.waitKey(1) & 0xFF
     if key == 115:
-        cv2.imwrite('../img/disperse/BSM_1799_contours.jpg', out)
+        cv2.imwrite('../img/disperse/BSM_1799_contours_out.jpg', out)
+        cv2.imwrite('../img/disperse/BSM_1799_contours_out1.jpg', out1)
         break
     if key == 27:
         break

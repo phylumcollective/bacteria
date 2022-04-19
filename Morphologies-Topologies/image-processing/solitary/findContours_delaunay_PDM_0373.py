@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import argparse
-import random
 
 
 def loadImg(s, read_as_float32=False, gray=False):
@@ -30,13 +29,7 @@ def drawDelaunay(img, subdiv, delaunayColor):
     triangleListNew = []
 
     for t in triangleList:
-        # randomly add or subtract 1 from the triangle points to minimize duplicate coordinates (latent)
-        randomlist = []
-        for i in range(0, 6):
-            n = random.randint(-1, 1)
-            randomlist.append(n)
-
-        triangleListNew.append([t[0]+randomlist[0], t[1]+randomlist[1], t[2]+randomlist[2], t[3]+randomlist[3], t[4]+randomlist[4], t[5]+randomlist[5]])
+        triangleListNew.append([t[0], t[1], t[2], t[3], t[4], t[5]])
 
         pt1 = (t[0], t[1])
         pt2 = (t[2], t[3])
@@ -64,7 +57,7 @@ def rectContains(rect, point):
     return True
 
 
-# thresh 115
+# thresh 90
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
@@ -73,9 +66,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 # load image, convert to gray and scale down
-img = loadImg('../img/solitary/DSC_3577.JPG', gray=True)
+img = loadImg('../img/solitary/PDM_0373.JPG', gray=True)
 img = scaleImg(img)
-img2 = loadImg('../img/solitary/DSC_3577.JPG')
+img2 = loadImg('../img/solitary/PDM_0373.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
@@ -83,7 +76,7 @@ img2 = scaleImg(img2)
 img_seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
 
 # blur & threshold
-imgBlur = cv2.medianBlur(img, 15)
+imgBlur = cv2.medianBlur(img, 13)  # limit blur (manifold)
 ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY)
 
 # find Contours
@@ -106,14 +99,14 @@ for i in range(len(contours)-2):
     # Calculate area and remove small elements
     area = cv2.contourArea(contours[i])
     # -1 in 4th column means it's an external contour
-    if hierarchy[0][i][3] == -1 and area > 260:
+    if hierarchy[0][i][3] == -1 and area > 190 and area < 3000000:
         M = cv2.moments(contours[i])
         # calculate x,y coordinate of centroid & draw it
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        if cY < img.shape[0] - 650 and cX < img.shape[0] - 200 and (cY * cX) > 99000 and cY > 300 and cX > 900:
+        if cY < img.shape[0] - 550 and cX < img.shape[1] - 300 and (cY * cX) > 99000 and cY > 300 and cX > 200:
             # contour approximation ("smoothing")
-            epsilon = 0.01*cv2.arcLength(contours[i], True)
+            epsilon = 0.05*cv2.arcLength(contours[i], True)
             approx = cv2.approxPolyDP(contours[i], epsilon, True)
             subdiv.insert(approx)
             # print(approx)
@@ -139,7 +132,7 @@ for t in delaunayPts:
 
 print("number of triangles: " + str(triCount))
 
-cv2.imshow("Image", scaleImg(loadImg('../img/solitary/DSC_3577.JPG')))
+cv2.imshow("Image", scaleImg(loadImg('../img/solitary/PDM_0373.JPG')))
 cv2.imshow("Contours (mask:out)", out)
 cv2.imshow("Contours (mask:out1)", out1)
 cv2.imshow("Contours", img2)
@@ -147,8 +140,8 @@ cv2.imshow("Contours", img2)
 while True:
     key = cv2.waitKey(1) & 0xFF
     if key == 115:
-        cv2.imwrite('../img/solitary/DSC_3577_contours_out.jpg', out)
-        cv2.imwrite('../img/solitary/DSC_3577_contours_out1.jpg', out1)
+        cv2.imwrite('../img/solitary/PDM_0373_contours_out.jpg', out)
+        cv2.imwrite('../img/solitary/PDM_0373_contours_out1.jpg', out1)
         break
     if key == 27:
         break

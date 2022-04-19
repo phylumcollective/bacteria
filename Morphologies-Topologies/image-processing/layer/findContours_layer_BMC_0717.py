@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import argparse
-import random
 
 
 def loadImg(s, read_as_float32=False, gray=False):
@@ -20,7 +19,7 @@ def scaleImg(img, scaleFactor=0.5):
     return cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
 
 
-# thresh 95
+# threshold = 92
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--threshold", default="127", help="The cutoff for the threshold algorithm (0-255)")
@@ -29,9 +28,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 # load image, convert to gray and scale down
-img = loadImg('../img/disperse/2021-06-29-2200-01-08-22.JPG', gray=True)
+img = loadImg('../img/layer/BMC_0717.JPG', gray=True)
 img = scaleImg(img)
-img2 = loadImg('../img/disperse/2021-06-29-2200-01-08-22.JPG')
+img2 = loadImg('../img/layer/BMC_0717.JPG')
 img2 = scaleImg(img2)
 
 # create the random seeds based upon image dimensions
@@ -39,7 +38,7 @@ img2 = scaleImg(img2)
 img_seeds = np.arange(1, (img.shape[0]*img.shape[1]) + 1).reshape(img.shape)
 
 # blur & threshold
-imgBlur = cv2.medianBlur(img, 15)
+imgBlur = cv2.medianBlur(img, 13)  # limit blur (manifold)
 ret, thresh = cv2.threshold(imgBlur, int(args.threshold), 255, cv2.THRESH_BINARY)
 
 # find Contours
@@ -49,7 +48,7 @@ contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_CCOMP, cv2.CHAIN_
 out = np.zeros_like(thresh)
 out1 = np.zeros_like(thresh)
 
-hull = []
+approxs = []
 gen_seeds = []
 
 # draw the contours (-2 removes plate edges)
@@ -57,49 +56,39 @@ for i in range(len(contours)-2):
     # Calculate area and remove small elements
     area = cv2.contourArea(contours[i])
     # -1 in 4th column means it's an external contour
-    if hierarchy[0][i][3] == -1 and area > 100 and area < 99000:
+    if hierarchy[0][i][3] == -1 and area > 270:
         M = cv2.moments(contours[i])
         # calculate x,y coordinate of centroid & draw it
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
-        if cY < img.shape[0] - 420 and cX < img.shape[1] - 400 and (cY * cX) > 99000 and cY > 470 and cX > 320:
-            # create a convex hull object for each contour
-            h = cv2.convexHull(contours[i], False)
-            # append to hull list
-            hull.append(h)
-            hullArea = cv2.contourArea(h)
-            if hullArea > 2000:
-                cv2.drawContours(out, contours, i, (204, 204, 204), 3)
-                cv2.drawContours(out1, contours, i, (204, 204, 204), 3)
-                cv2.drawContours(out1, [h], -1, (204, 204, 204), 3)
-                cv2.drawContours(img2, contours, i, (204, 204, 204), 3)
-                cv2.drawContours(img2, [h], -1, (204, 204, 204), 3)
-                # print("number of hull points: " + str(len(h)))
-                # for hh in h:
-                #     coord = hh[0]
-                #     circle = cv2.circle(img2, coord, 10, (255, 0, 0), 1)
-
-
-for h in hull:
-    hullArea = cv2.contourArea(h)
-    if hullArea > 2000:
-        print("number of hull points: " + str(len(h)))
-        for hh in h:
-            coord = hh[0]
-            # randomly adjust the amounts (latent)
-            r0 = random.randint(-1, 1)
-            r1 = random.randint(-1, 1)
-            coord[0] = coord[0] + r0
-            coord[1] = coord[1] + r1
-            # remember numpy arrays are row/col while opencv are col/row (as is common for images)
-            # print(img_seeds[coord[1]][coord[0]])
-            gen_seeds.append(img_seeds[coord[1]][coord[0]])
-            print(coord)
+        if cY < img.shape[0] - 290 and cX < img.shape[0] - 1 and (cY * cX) > 99000 and cY > 300 and cX > 190:
+            # contour approximation ("smoothing")
+            epsilon = 0.05*cv2.arcLength(contours[i], True)  # reduce points (remnant)
+            approx = cv2.approxPolyDP(contours[i], epsilon, True)
+            approxs.append(approx)
+            # print(approx)
+            cv2.drawContours(out1, [approx], -1, (204, 204, 204), 3)
+            # approx2 = cv2.approxPolyDP(contours[i], epsilon*0.01, True)
+            cv2.drawContours(out, contours, i, (204, 204, 204), 3)
+            cv2.drawContours(img2, [approx], -1, (204, 204, 204), 3)
+            # cv2.drawContours(out, contours, i, (204, 204, 204), 3)
+            # print(contours[i][0][0])
+            # for a in approx:
+            #     for aa in a:
+            #         print(aa)
+print("number of contours: " + str(len(approxs)))
+for a in approxs:
+    for cnt in a:
+        coord = cnt[0]
+        # remember numpy arrays are row/col while opencv are col/row (as is common for images)
+        # print(img_seeds[coord[1]][coord[0]])
+        gen_seeds.append(img_seeds[coord[1]][coord[0]])
+        # print(coord)
 
 print("number of seeds: " + str(len(gen_seeds)))
 
 
-cv2.imshow("Image", scaleImg(loadImg('../img/disperse/2021-06-29-2200-01-08-22.JPG')))
+cv2.imshow("Image", scaleImg(loadImg('../img/layer/BMC_0717.JPG')))
 cv2.imshow("Contours (mask:out)", out)
 cv2.imshow("Contours (mask:out1)", out1)
 cv2.imshow("Contours", img2)
@@ -107,8 +96,8 @@ cv2.imshow("Contours", img2)
 while True:
     key = cv2.waitKey(1) & 0xFF
     if key == 115:
-        cv2.imwrite('../img/disperse/2021-06-29-2200-01-08-22_contours_out.jpg', out)
-        cv2.imwrite('../img/disperse/2021-06-29-2200-01-08-22_contours_out1.jpg', out1)
+        cv2.imwrite('../img/layer/BMC_0717_contours_out.jpg', out)
+        cv2.imwrite('../img/layer/BMC_0717_contours_out1.jpg', out1)
         break
     if key == 27:
         break
