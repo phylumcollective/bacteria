@@ -59,4 +59,5 @@ psd-tools3
 lpips==0.1.4
 PyMuPDF==1.19.2
 requests==2.21.0
-gphoto2==2.3.0
+sh==1.14.2
+gphoto2==2.3.4 --only-binary :all:
