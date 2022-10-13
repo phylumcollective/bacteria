@@ -1,7 +1,7 @@
-'''
+"""
 Object tracking. Find contours in a video and send either
 the boundingRect coordinates or the convex hull points via OSC
-'''
+"""
 
 import cv2
 import argparse
@@ -17,20 +17,22 @@ def rescaleFrame(frame, scaleFactor=0.5):
     return cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
 
 
-def sendContour(id, area, x=0, y=0, w=0, h=0, hull=None, addr='/swarm/contour'):
+def sendContour(id, area, x=0, y=0, w=0, h=0, hull=None, addr="/swarm/contour"):
     # send OSC Message representing a contour bounding box in the form of:
     # ["/swarm/contour", id, area, x, y, w, h, hull, addr]
     msg = osc_message_builder.OscMessageBuilder(address=addr)
-    msg.add_arg(id, arg_type='i')
-    msg.add_arg(area, arg_type='f')
+    msg.add_arg(id, arg_type="i")
+    msg.add_arg(area, arg_type="f")
     # if convex hull point are passed, send those (instead of bounding box pts)
     if hull is not None:
-        msg.add_arg(str(hull), arg_type='s')  # send as a string since OSC doesn't like arrays
+        msg.add_arg(
+            str(hull), arg_type="s"
+        )  # send as a string since OSC doesn't like arrays
     else:
-        msg.add_arg(x, arg_type='i')
-        msg.add_arg(y, arg_type='i')
-        msg.add_arg(w, arg_type='i')
-        msg.add_arg(h, arg_type='i')
+        msg.add_arg(x, arg_type="i")
+        msg.add_arg(y, arg_type="i")
+        msg.add_arg(w, arg_type="i")
+        msg.add_arg(h, arg_type="i")
     oscClient.send(msg.build())
     # arr = np.array(pts, dtype='int32')
     # # arr1 = np.append(arr, [[[-1, -1]]], axis=0)  # mark end of the array
@@ -39,22 +41,22 @@ def sendContour(id, area, x=0, y=0, w=0, h=0, hull=None, addr='/swarm/contour'):
     # print(str(id) + ": " + str(x) + "," + str(y) + "," + str(w) + "," + str(h))
 
 
-def sendContours(boxIds, addr='/swarm/contour'):
+def sendContours(boxIds, addr="/swarm/contour"):
     # send OSC Bundle with OSC messages representing all contour bounding boxes:
     # ["/swarm/contour", id, area, x, y, w, h]
     bundle = osc_bundle_builder.OscBundleBuilder(osc_bundle_builder.IMMEDIATELY)
     for boxId in boxIds:
         x, y, w, h, id, cntr, hull = boxId
         msg = osc_message_builder.OscMessageBuilder(address=addr)
-        msg.add_arg(id, arg_type='i')
-        msg.add_arg(cv2.contourArea(cntr), arg_type='f')
+        msg.add_arg(id, arg_type="i")
+        msg.add_arg(cv2.contourArea(cntr), arg_type="f")
         if args.sendHull:
-            msg.add_arg((str(hull)), arg_type='s')
+            msg.add_arg((str(hull)), arg_type="s")
         else:
-            msg.add_arg(x, arg_type='i')
-            msg.add_arg(y, arg_type='i')
-            msg.add_arg(w, arg_type='i')
-            msg.add_arg(h, arg_type='i')
+            msg.add_arg(x, arg_type="i")
+            msg.add_arg(y, arg_type="i")
+            msg.add_arg(w, arg_type="i")
+            msg.add_arg(h, arg_type="i")
         bundle.add_content(msg.build())
         # arr = np.array(pts, dtype='int32')
         # # arr1 = np.append(arr, [[[-1, -1]]], axis=0)  # mark end of the array
@@ -69,14 +71,31 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--ip", default="127.0.0.1", help="The ip of the OSC server")
-    parser.add_argument("--port", type=int, default=5005, help="The port the OSC server is listening on")
-    parser.add_argument("--bundle", type=bool, default=False, help="Send contours as an OSC Bundle (instead of individual OSC Messages)")
-    parser.add_argument("--drawHull", type=bool, default=False, help="Draw a convexHull version of the points instead of the full contours")
-    parser.add_argument("--sendHull", type=bool, default=False, help="Send convexHull points instead of the boundingRect points of the contours")
+    parser.add_argument(
+        "--port", type=int, default=5005, help="The port the OSC server is listening on"
+    )
+    parser.add_argument(
+        "--bundle",
+        type=bool,
+        default=False,
+        help="Send contours as an OSC Bundle (instead of individual OSC Messages)",
+    )
+    parser.add_argument(
+        "--drawHull",
+        type=bool,
+        default=False,
+        help="Draw a convexHull version of the points instead of the full contours",
+    )
+    parser.add_argument(
+        "--sendHull",
+        type=bool,
+        default=False,
+        help="Send convexHull points instead of the boundingRect points of the contours",
+    )
     args = parser.parse_args()
 
     # adding utils folder to the system path
-    sys.path.insert(0, '/Users/carlos/Documents/GitHub/bacteria/utils/')
+    sys.path.insert(0, "/Users/carlos/Documents/GitHub/bacteria/utils/")
     import distanceTracker
 
     # def adjustContrast(image, clip_hist_percent=1):
@@ -130,8 +149,8 @@ if __name__ == "__main__":
     tracker = distanceTracker.EuclideanDistTracker()
 
     # set up video capture
-    # cap = cv2.VideoCapture("videos/PA_03-15-21.mp4")
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture("videos/PA_03-15-21.mp4")
+    # cap = cv2.VideoCapture(2)
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 512)
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 512)
 
@@ -146,8 +165,7 @@ if __name__ == "__main__":
     averageVal = np.float32(frameGray)
 
     # Object detection object
-    object_detector = cv2.createBackgroundSubtractorMOG2(
-       history=100, varThreshold=25)
+    object_detector = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=25)
 
     # kernel for noise removal and dilation
     kernel = np.ones((3, 3), np.uint8)
@@ -213,7 +231,9 @@ if __name__ == "__main__":
         runningAvg = cv2.convertScaleAbs(averageVal)
 
         # find contours
-        contours, hierarchy = cv2.findContours(runningAvg, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(
+            runningAvg, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE
+        )
         # print(contours)
 
         # portions below based on code by Sergio Canu:
@@ -260,8 +280,9 @@ if __name__ == "__main__":
             sendContours(boxes_ids)
         for box_id in boxes_ids:
             x, y, w, h, id, cntr, hull = box_id
-            cv2.putText(roi, str(id), (x, y - 15),
-                        cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 0), 1)
+            cv2.putText(
+                roi, str(id), (x, y - 15), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 0), 1
+            )
             cv2.rectangle(roi, (x, y), (x + w, y + h), (0, 0, 0), 1)
             # send the contour via OSC
             if not args.bundle:
