@@ -10,7 +10,7 @@ from tensorflow.keras import backend as K
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Conv2D, Conv2DTranspose, Flatten, Input, Dense, Dropout, Lambda, Reshape, MaxPooling2D, LSTM, Reshape
 # from tensorflow.keras.models importkdl,kkk'sdee
-import os 
+import os
 import sys
 import serial
 import threading
@@ -19,7 +19,7 @@ from time import sleep
 import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../.."))
-from uarm.wrapper import SwiftAPI 
+from uarm.wrapper import SwiftAPI
 
 
 # configure the Serial port
@@ -40,12 +40,12 @@ def CustomLayer(keras.layers.Layer):
     def vae_loss(self, x, z_decoded):
         x = K.flatten(x)
         z_decoded = K.flatten(z_decoded)
-            
+
         recon_loss = keras.metrics.binary_crossentropy(x, z_decoded)
-            
+
         kl_loss = -5e-4 * K.mean(1 + z_sigma - K.square(z_mu) - K.exp(z_sigma), axis=-1)
         return K.mean(recon_loss + kl_loss)
-    
+
     def call(self, inputs):
         x = inputs[0]
         z_decoded = inputs[1]
@@ -79,7 +79,7 @@ def main():
     sleep(1)
 
     # === INITIALIZE SERIAL COMMUNICATION WITH ARDUINO ===
-    syringe_pump_serial = serial_connect("/dev/cu.usbmodem141401", 19200, timeout=10)
+    syringe_pump_serial = serial_connect("/dev/cu.usbmodem1441401", 19200, timeout=10)
     syringe_pump_serial.reset_output_buffer()
 
     # serial reader thread
@@ -172,7 +172,7 @@ def main():
     input_shape = (img_height, img_width, num_channels)
     z_len = 2048
     a_len = 1
-    
+
     latent_dim = 2048
 
     input_img = Input(shape=input_shape, name='encoder_input')
@@ -186,23 +186,23 @@ def main():
     x = MaxPooling2D((2,2), padding='same')
     x = Dropout(0.2)(x)
     x = Conv2D(32, 3, padding='same', activation='relu')(x)
-    
+
     conv_shape = K.int_shape(x)
     x = Flatten()(x)
     x = Dense(latent_dim*2, activation='relu')(x)
-    
+
     z_mu = Dense(latent_dim, name='latent_mu')(x)
     z_sigma = Dense(latent_dim, name='latent_sigma')(x)
-    
+
     def sample_z(args):
         z_mu, z_sigma = args
         eps = K.random_normal(shape=(K.shape(z_mu)[0], K.int_shape(z_mu)[1]))
         return z_mu + K.exp(z_sigma / 2) * eps
-    
+
     z = Lambda(sample_z, output_shape=(latent_dim,), name='z')([z_mu, z_sigma])
-    
+
     encoder = Model(input_img, [z_mu, z_sigma, z], name='encoder')
-    
+
     decoder_input = Input(shape=(latent_dim, ), name='decoder_input')
 
     x = Dense(conv_shape[1]*conv_shape[2]*conv_shape[3], activation='relu')(decoder_input)
@@ -222,24 +222,24 @@ def main():
     # with Nikon DSLR/Mirrorless camera as streaming device
     cap = cv2.VideoCapture(0)
     print("camera ready...")
-    
+
     # Put a Python Counter so we grab an image every x minutes
     counter = 30
     while counter == 30:
         ret, frame = cap.read()
         frame = cv2.resize(frame, None, fx=1.5, fy=1.5, interpolation=cv2.INTERAREA)
         cv2.imshow('Input', frame)
-        
+
         c = cv2.waitKey(1)
         if c == 27:
             break
-    
+
     cap.release()
     cv2.destroyAllWindows()
 
 
     y = CustomLayer()([input_img, z_decoded])
-    
+
     input_to_rnn = Input(shape=(1,z_len))
 
     x = LSTM(z_len, return_sequences=True)(input_to_rnn)
@@ -248,7 +248,7 @@ def main():
     x = Dropout(0.2)(x)
 
     rnn_output = Dense(2048, activation='sigmoid')(x)
-    
+
     # Controller
     input_to_controller = Input(shape=(1, z_len*2))
 
@@ -271,15 +271,15 @@ def main():
     ctrl.load_weights(os.getcwd() + "/models/cntrl.h5")
     #img_path = os.getcwd() + "/images/2021-03-10/2021-03-12-1615-01-30-22.NEF"
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
 
     # === CAPTURE IMAGES, DO MODEL PREDICTION & CONTROLLER ACTIONS ===
     # main program loop
@@ -305,12 +305,12 @@ def main():
         zprime = rnn.predict(z)
         z_and_zprime = np.reshape(np.concatenate((z[0][0], zprime[0][0])), (1, z_len*2))[None,:,:]
         action = ctrl.predict(z_and_zprime)
-        
+
         #World Mdoel Results
         print("z: ", z)
         print("z': ", zprime)
         print("action: ", action)
-    
+
         # To Simulate the Controller Making Predictions: Random Action
         action = np.randint(0,8)
 
@@ -449,8 +449,8 @@ def main():
         syringe_pump_serial.write(b"S\n")  # put the steppers back to sleep
 
         # detach the uArm stepper motors
-        print("putting the uArm to sleep...")
-        swift.send_cmd_sync("M2019")
+        # print("putting the uArm to sleep...")
+        # swift.send_cmd_sync("M2019")
 
         # wait (30 minutes in the real system, 10 secs here for testing)
         print("waiting for next action...")
