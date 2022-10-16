@@ -70,7 +70,8 @@ def main():
     print(position)
 
     # Set arm to home position
-    HOME = (100, 0, 20)
+    # HOME = (100, 0, 20)
+    HOME = (200, 0, -10)
     swift.set_buzzer(1000, 0.5)
     swift.set_wrist(90)
     print("moving arm to home position...")
@@ -98,37 +99,37 @@ def main():
     # === COORDINATES & AMOUNTS ===
     # pipette tip location coords (y should be -127 or less)
     tip_coords = (
-        (51.5, -127.9, -58),
-        (51.5, -137, -58),
-        (51.5, -146.1, -58),
+        (149.1, -161.4, -87.2),
+        (149.1, -160.5, -87.2),
+        (149.1, -159.6, -87.2),
     )
     tip_idx = 0
 
     # attractant/repellent locations and amounts (all amounts are in microliters)
     attractants = {
         "peptone": (
-            {"concentration": "high", "amount": 20, "location": (140.5, -129.41, -5)},
-            {"concentration": "low", "amount": 20, "location": (140.5, -145.41, -5)},
-            {"concentration": "high", "amount": 5, "location": (140.5, -129.41, -5)},
-            {"concentration": "low", "amount": 5, "location": (140.5, -145.41, -5)},
+            {"concentration": "high", "amount": 20, "location": (240.5, -149.41, 25)},
+            {"concentration": "low", "amount": 20, "location": (240.5, -165.41, 25)},
+            {"concentration": "high", "amount": 5, "location": (240.5, -149.41, 25)},
+            {"concentration": "low", "amount": 5, "location": (240.5, -165.41, 25)},
         ),
         "dextrose": (
-            {"concentration": "high", "amount": 20, "location": (140.5, -161.41, -5)},
-            {"concentration": "low", "amount": 20, "location": (140.5, -177.41, -5)},
-            {"concentration": "high", "amount": 5, "location": (140.5, -161.41, -5)},
-            {"concentration": "low", "amount": 5, "location": (140.5, -177.41, -5)},
+            {"concentration": "high", "amount": 20, "location": (240.5, -181.41, 25)},
+            {"concentration": "low", "amount": 20, "location": (240.5, -197.41, 25)},
+            {"concentration": "high", "amount": 5, "location": (240.5, -181.41, 25)},
+            {"concentration": "low", "amount": 5, "location": (240.5, -197.41, 25)},
         ),
         "lb": (
-            {"concentration": "high", "amount": 20, "location": (156.5, -129.41, -5)},
-            {"concentration": "low", "amount": 20, "location": (156.5, -145.41, -5)},
-            {"concentration": "high", "amount": 5, "location": (156.5, -129.41, -5)},
-            {"concentration": "low", "amount": 5, "location": (156.5, -145.41, -5)},
+            {"concentration": "high", "amount": 20, "location": (256.5, -149.41, 25)},
+            {"concentration": "low", "amount": 20, "location": (256.5, -165.41, 25)},
+            {"concentration": "high", "amount": 5, "location": (256.5, -149.41, 25)},
+            {"concentration": "low", "amount": 5, "location": (256.5, -165.41, 25)},
         ),
         "soc": (
-            {"concentration": "high", "amount": 20, "location": (156.5, -161.41, -5)},
-            {"concentration": "low", "amount": 20, "location": (156.5, -177.41, -5)},
-            {"concentration": "high", "amount": 5, "location": (156.5, -161.41, -5)},
-            {"concentration": "low", "amount": 5, "location": (156.5, -177.41, -5)},
+            {"concentration": "high", "amount": 20, "location": (256.5, -181.41, 25)},
+            {"concentration": "low", "amount": 20, "location": (256.5, -197.41, 25)},
+            {"concentration": "high", "amount": 5, "location": (256.5, -171.41, 25)},
+            {"concentration": "low", "amount": 5, "location": (256.5, -197.41, 25)},
         ),
     }
     repellents = {
@@ -159,10 +160,10 @@ def main():
     }
 
     # plate locations
-    plate_coords = ((260, 0, -12), (265, 0, -12))
+    plate_coords = ((265, 0, -17), (266, 0, -17))
 
     # trash location
-    trash_coords = (260, -160, 40)
+    trash_coords = (270, -175, 50)
 
     # === LOAD WORLD MODEL ===
     print("loading world model...")
@@ -323,8 +324,8 @@ def main():
         swift.set_position(
             tip_coords[tip_idx][0],
             tip_coords[tip_idx][1],
-            z=35.24,
-            speed=200,
+            z=15.24,
+            speed=20,
             timeout=30,
             wait=True,
         )  # current pipette tip location
@@ -345,14 +346,14 @@ def main():
             z=tip_coords[tip_idx][2] + 60, speed=2, timeout=30, wait=True,
         )  # go back up
         sleep(0.1)
-        swift.set_position(z=35.24, speed=200, timeout=30, wait=True)  # go back up
+        swift.set_position(z=35.24, speed=50, timeout=30, wait=True)  # go back up
         sleep(1)
 
         # increment tip location
         tip_idx += 1
 
         # move arm to location of attractant/repellent selected by RL controller
-        curr_solution_loc = attractants["dextrose"][0]["location"]
+        curr_solution_loc = attractants["peptone"][0]["location"]
         print("extracting attractant/repellent solution...")
         swift.set_position(
             x=curr_solution_loc[0],
@@ -390,8 +391,8 @@ def main():
         swift.set_position(
             x=plate_coords[0][0],
             y=plate_coords[0][1],
-            z=25,
-            speed=200,
+            z=5,
+            speed=20,
             timeout=30,
             wait=True,
         )  # current plate location
@@ -413,14 +414,19 @@ def main():
             z=plate_coords[0][2] + 40, speed=3, timeout=30, wait=True
         )  # go back up
         sleep(0.1)
-        swift.set_position(z=50, speed=20, timeout=30, wait=True)  # go back up
+        swift.set_position(z=25, speed=20, timeout=30, wait=True)  # go back up
         sleep(1)
 
         # move arm to trash location
         swift.set_position(
-            x=trash_coords[0], y=trash_coords[1], z=65, speed=200, timeout=30, wait=True
+            x=trash_coords[0],
+            y=trash_coords[1],
+            z=trash_coords[2],
+            speed=50,
+            timeout=30,
+            wait=True,
         )  # current trash location
-        swift.set_position(z=trash_coords[2] + 19, speed=20, timeout=30, wait=True)
+        swift.set_position(z=trash_coords[2] + 9, speed=20, timeout=30, wait=True)
         swift.set_position(z=trash_coords[2], speed=5, timeout=30, wait=True)
 
         # TODO - connect pipette to servo
@@ -429,7 +435,7 @@ def main():
         sleep(1)
         swift.set_wrist(90, wait=True)
         sleep(1)
-        swift.set_position(z=20, speed=20, timeout=30, wait=True)  # go back up
+        swift.set_position(z=50, speed=20, timeout=30, wait=True)  # go back
         sleep(1)
 
         # Go back to Home position
@@ -457,8 +463,8 @@ def main():
         sleep(10)
 
         # attach the uArm stepper motors
-        print("waking up the uArm...")
-        swift.send_cmd_sync("M17")
+        # print("waking up the uArm...")
+        # swift.send_cmd_sync("M17")
 
 
 if __name__ == "__main__":
