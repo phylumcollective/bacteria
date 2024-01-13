@@ -70,10 +70,9 @@ def main():
                 print('Copying image to', target)
                 camera_file = camera.file_get(file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL)
                 camera_file.save(target)
-                # load image, draw frame using opengl and send it to syphon
+                # load image, draw frame
                 img = loadImg(target)
                 img = cv2.resize(img, DIMENSIONS)
-                imgcvt = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # opencv uses bgr so we have to convert
                 cv2.imshow('Camera image', img)
 
             key = cv2.waitKey(1) & 0xFF

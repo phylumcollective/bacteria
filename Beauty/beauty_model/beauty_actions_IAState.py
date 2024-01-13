@@ -104,7 +104,7 @@ def main():
     sleep(1)
 
     # === INITIALIZE SERIAL COMMUNICATION WITH ARDUINO ===
-    syringe_pump_serial = serial_connect("/dev/cu.usbmodem1441401", 19200, timeout=10)
+    syringe_pump_serial = serial_connect("/dev/cu.usbmodem1441201", 19200, timeout=10)
     syringe_pump_serial.reset_output_buffer()
 
     # serial reader thread
