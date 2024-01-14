@@ -5,7 +5,6 @@ import logging
 import argparse
 import cv2
 import numpy as np
-sys.path.insert(0, '../utils/')  # adding utils folder to the system path
 import gphoto2 as gp
 
 
