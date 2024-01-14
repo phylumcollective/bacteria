@@ -384,11 +384,6 @@ def main():
                 img = loadImg(target)
                 #img_array = cv2.imread(img_path)
 
-                # show image full screen
-                cv2.namedWindow("Beauty", cv2.WINDOW_NORMAL)
-                cv2.setWindowProperty("Beauty", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-                cv2.imshow("Beauty", img)
-
                 # convert to grayscale & resize
                 img_array = cv2.imread(img)
                 img_array = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
@@ -407,6 +402,15 @@ def main():
                 
                 # predictions by each piece of the model
                 z = encoder.predict(img_array) # encode image
+
+                # show predicted image
+                decoded_img = decoder.predict(np.array([z[0][0]]))
+                decoded_img_reshaped = decoded_img.reshape(img_height, img_width)
+                # show image full screen
+                cv2.namedWindow("Beauty", cv2.WINDOW_NORMAL)
+                cv2.setWindowProperty("Beauty", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+                cv2.imshow("Beauty", decoded_img_reshaped)
+
                 z = z.reshape(-1, 1, 2048) # reshape for rnn
                 zprime = rnn.predict(z) # make prediction (of future image/state)
                 z_and_zprime = np.reshape(np.concatenate((z[0][0], zprime[0][0])), (1, z_len*2))[None,:,:] # concat for controller
