@@ -21,7 +21,7 @@ matplotlib==3.4.2
 more-itertools==8.8.0
 notebook==6.4.0
 pandas==1.3.1
-pandocfilters==1.4.3
+pandocfilters==1.5.0
 parso==0.8.2
 pexpect==4.8.0
 pickleshare==0.7.5
@@ -31,7 +31,6 @@ prompt-toolkit==3.0.19
 protobuf==3.17.3
 ptyprocess==0.7.0
 pydot==1.4.2
-pydotplus==2.0.2
 Pygments==2.9.0
 pyparsing==2.4.7
 pyrsistent==0.18.0
@@ -50,12 +49,9 @@ wheel==0.36.2
 wrapt==1.12.1
 flake8==3.9.2
 tensorflow==2.5.1
-seaborn==0.11.2
-labelImg==1.8.5
+seaborn
 pyserial==3.5
-imutils==0.5.4
 mac-tag
-psd-tools3
 lpips==0.1.4
 PyMuPDF==1.19.2
 requests==2.21.0
