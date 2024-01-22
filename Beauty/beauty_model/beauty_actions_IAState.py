@@ -382,6 +382,7 @@ def main():
                 camera_file.save(target)
                 print("image saved")
                 # load in image
+                img = loadImg(target)
                 img_array = loadImg(target, gray=True)
                 #img_array = cv2.imread(img_path)
 
