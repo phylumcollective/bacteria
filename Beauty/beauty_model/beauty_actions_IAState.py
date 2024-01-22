@@ -380,13 +380,14 @@ def main():
                     file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL
                 )
                 camera_file.save(target)
-                # load in image and reshape
-                img = loadImg(target)
+                print("image saved")
+                # load in image
+                img_array = loadImg(target, gray=True)
                 #img_array = cv2.imread(img_path)
 
-                # convert to grayscale & resize
-                img_array = cv2.imread(img)
-                img_array = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+                # resize
+                #img_array = cv2.imread(img)
+                #img_array = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
                 img_array = cv2.resize(img_array, (img_height, img_width), interpolation=cv2.INTER_AREA)
                 img_array = img_array.reshape(-1, img_height, img_width, 1)
 
