@@ -403,12 +403,13 @@ def main():
                 cv2.putText(img, "Capturing image and showing it to world model...", (10, 450), font, 1, (255, 255, 0), 1, cv2.LINE_AA)
                 
                 # predictions by each piece of the model
-                z = encoder.predict(img_array)[0] # encode image
+                z = encoder.predict(img_array) # encode image
                 print("predicted z: ")
                 print(z)
 
                 # show predicted image
-                decoded_img = decoder.predict(np.array([z[0]]))
+                #decoded_img = decoder.predict(np.array([z[0][0]]))
+                decoded_img = decoder.predict(np.array(z))
                 decoded_img_reshaped = decoded_img.reshape(img_height, img_width)
                 # show image full screen
                 cv2.namedWindow("Beauty", cv2.WINDOW_NORMAL)
