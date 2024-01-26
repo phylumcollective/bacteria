@@ -23,7 +23,9 @@ import argparse
 import random
 import math
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../.."))
+# sys.path.append(os.path.join(os.path.dirname(__file__), "../../.."))
+sys.path.append(os.path.join(os.path.dirname(__file__), "/Users/designuser/Documents/GitHub/uArm-Python-SDK"))
+
 from uarm.wrapper import SwiftAPI
 
 
@@ -104,7 +106,8 @@ def main():
     sleep(1)
 
     # === INITIALIZE SERIAL COMMUNICATION WITH ARDUINO ===
-    syringe_pump_serial = serial_connect("/dev/cu.usbmodem1441201", 19200, timeout=10)
+    # syringe_pump_serial = serial_connect("/dev/cu.usbmodem1441201", 19200, timeout=10)
+    syringe_pump_serial = serial_connect("/dev/cu.usbmodem201", 19200, timeout=10)
     syringe_pump_serial.reset_output_buffer()
 
     # serial reader thread
@@ -294,7 +297,8 @@ def main():
         def call(self, inputs):
             x = inputs[0]
             z_decoded = inputs[1]
-            loss = self.vae.loss(x, z_decoded)
+            # loss = self.vae.loss(x, z_decoded)
+            loss = self.vae_loss(x, z_decoded)
             self.add_loss(loss, inputs=inputs)
             return x
 
@@ -326,7 +330,9 @@ def main():
     x = Dropout(0.2)(x)
     x = Dense(z_len/2)(x)
     x = Dropout(0.2)(x)
-    x = Dense(z_len/4)(input_to_controller)
+    # causes an error in shape:
+    # x = Dense(z_len/4)(input_to_controller)
+    x = Dense(z_len/4)(x)
     x = Dropout(0.2)(x)
     x = Dense(z_len/16)(x)
     x = Dropout(0.2)(x)
